@@ -13,6 +13,10 @@ const AlbumSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    image_link: {
+        type: String,
+        required: true,
+    },
     creator: {
         type: mongoose.Types.ObjectId,
         required: true,

@@ -3,15 +3,36 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
+// const cors = require("cors");
 
 const Users = require("../models/User");
 const Albums = require("../models/Album");
 const Photos = require("../models/Photos");
 const auth = require("../middleware/auth");
+const modauth = require("../middleware/modified_auth")
+const cors = require("../middleware/cors");
+
+router.get("/auth", modauth, (req, res, next) => {
+    console.log(req.cookies);
+    if(req.cookies["token"].length){
+        return res.status(200).json({
+            message: "LoggedIn",
+            token: req.cookies.token
+        });
+    }
+    else{
+        return res.status(404).json({
+            message: "NOT_LoggedIn"
+        });
+    }
+    next();
+});
 
 router.post("/signup", async(req, res, next) => {
     const username = req.body.username;
     const password = req.body.password;
+
+    console.log('[username]',username,'[password]',password);
 
     if (username.length < 4) {
         return res.status(404).json({
@@ -61,7 +82,8 @@ router.post("/signup", async(req, res, next) => {
                     })
                 } else {
                     res.status(200).json({
-                        message: "All Good and User has been created"
+                        message: "All Good and User has been created",
+                        username: username
                     });
                     next();
                 }
@@ -71,7 +93,8 @@ router.post("/signup", async(req, res, next) => {
 });
 
 
-router.post("/login", async(req, res, next) => {
+router.post("/login", cors, async(req, res, next) => {
+    console.log(req.body);
     const username = req.body.username;
     const password = req.body.password;
 
@@ -96,6 +119,9 @@ router.post("/login", async(req, res, next) => {
             }, process.env.JWT_KEY, {
                 expiresIn: "2h"
             });
+
+            res.setHeader('Cache-Control', 'private');
+            res.cookie("__session", token);
 
             return res.status(200).json({
                 message: "User Logged in Succesfully",
@@ -209,6 +235,16 @@ router.delete("/:username", auth, async(req, res, next) => {
         });
     }
 });
+
+
+router.get("/logout", async (req, res, next) => {
+    res.clearCookie(token);
+
+    res.status(200).json({
+        message: "Logged Out"
+    });
+
+})
 
 
 module.exports = router;

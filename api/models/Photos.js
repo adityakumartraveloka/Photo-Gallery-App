@@ -7,6 +7,10 @@ const PhotoSchema = mongoose.Schema({
     },
     image_name: {
         type: String,
+        required: true
+    },
+    image_link: {
+        type: String,
     },
     destination: {
         type: String,

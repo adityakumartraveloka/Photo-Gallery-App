@@ -45,6 +45,23 @@ const upload = multer({
     fileFilter: fileFilter
 })
 
+router.get("/", async(req, res, next) => {
+    const data = await Albums.find({ private: false });
+
+    if(data){
+        return res.status(200).json({
+            message: "Public albums are displayed",
+            data: data
+        });
+    }
+    else{
+        return res.status(404).json({
+            message: "There is nothing to show",
+            data: null
+        });
+    }
+})
+
 
 router.post("/create", auth, upload.single("cover-photo"), async(req, res, next) => {
 
@@ -58,7 +75,12 @@ router.post("/create", auth, upload.single("cover-photo"), async(req, res, next)
 
     // console.log(req.body);
     // console.log(req.file);
-    if (req.body.album_name === null || req.body.album_name === undefined || req.file === null || req.file === undefined || req.body.private === null || req.body.private === undefined) {
+    if (req.body.album_name === null ||
+        req.body.album_name === undefined || 
+        req.file === null || 
+        req.file === undefined || 
+        req.body.private === null ||
+        req.body.private === undefined) {
         return res.status(404).json({
             message: "There is something missing, so that request can not proceed furthur"
         });
@@ -69,6 +91,8 @@ router.post("/create", auth, upload.single("cover-photo"), async(req, res, next)
         private: req.body.private,
         cover_photo: req.file.path,
         creator: req.userData._id,
+        image_link: `https://picsum.photos/id/` + Math.floor(Math.random() * 1000000000000) % 1069 + '/300/210'
+
     }, (err, album) => {
         if (err) {
             return res.status(404).json({
@@ -143,6 +167,7 @@ router.post("/:album_name/add", auth, upload.single("image"), async(req, res, ne
     Photos.create({
         album_id: album._id,
         destination: req.file.path,
+        image_link: `https://picsum.photos/id/` + Math.floor(Math.random() * 1000000000000) % 1069 + '/300/210'
     }, (err, data) => {
         if (err) {
             return res.status(404).json({

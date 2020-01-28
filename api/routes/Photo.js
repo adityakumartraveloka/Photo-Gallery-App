@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require("multer");
 const path = require("path");
 
-
+// Nothing to use here
 const Photo = require("../models/Photos");
 const Album = require("../models/Album");
 
